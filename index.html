@@ -1,492 +1,53 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Webex Click-to-Call App</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-
-        .container {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            max-width: 500px;
-            width: 100%;
-            text-align: center;
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, #00BCF2, #1F8CBF);
-            border-radius: 20px;
-            margin: 0 auto 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
-            font-weight: bold;
-        }
-
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 28px;
-            font-weight: 700;
-        }
-
-        .subtitle {
-            color: #666;
-            margin-bottom: 40px;
-            font-size: 16px;
-        }
-
-        .status {
-            padding: 12px 20px;
-            border-radius: 25px;
-            margin-bottom: 30px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        .status.disconnected {
-            background: #ffebee;
-            color: #c62828;
-            border: 1px solid #ffcdd2;
-        }
-
-        .status.connecting {
-            background: #fff3e0;
-            color: #ef6c00;
-            border: 1px solid #ffcc02;
-        }
-
-        .status.connected {
-            background: #e8f5e8;
-            color: #2e7d32;
-            border: 1px solid #a5d6a7;
-        }
-
-        .phone-input-container {
-            position: relative;
-            margin-bottom: 30px;
-        }
-
-        .phone-input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 2px solid #e0e0e0;
-            border-radius: 15px;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            background: #fafafa;
-        }
-
-        .phone-input:focus {
-            outline: none;
-            border-color: #00BCF2;
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 188, 242, 0.2);
-        }
-
-        .call-button {
-            background: linear-gradient(135deg, #00BCF2, #1F8CBF);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            border-radius: 50px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .call-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 188, 242, 0.3);
-        }
-
-        .call-button:active {
-            transform: translateY(-1px);
-        }
-
-        .call-button:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .call-icon {
-            width: 20px;
-            height: 20px;
-            fill: currentColor;
-        }
-
-        .quick-contacts {
-            margin-top: 30px;
-            text-align: left;
-        }
-
-        .quick-contacts h3 {
-            color: #333;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .contact-item:hover {
-            background: #e3f2fd;
-            transform: translateX(5px);
-        }
-
-        .contact-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .contact-avatar {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-        }
-
-        .contact-details {
-            flex-grow: 1;
-        }
-
-        .contact-name {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .contact-number {
-            font-size: 14px;
-            color: #666;
-        }
-
-        .call-contact-btn {
-            background: #00BCF2;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .call-contact-btn:hover {
-            background: #1F8CBF;
-            transform: scale(1.05);
-        }
-
-        .loading {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #00BCF2;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-message {
-            background: #ffebee;
-            color: #c62828;
-            padding: 10px 15px;
-            border-radius: 10px;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        @media (max-width: 480px) {
-            .container {
-                padding: 30px 20px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .call-button {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="logo">WX</div>
-        <h1>Webex Click-to-Call</h1>
-        <p class="subtitle">Connect instantly with just one click</p>
-        
-        <div id="status" class="status disconnected">
-            Initializing Webex SDK...
-        </div>
-
-        <div class="phone-input-container">
-            <input type="tel" id="phoneInput" class="phone-input" placeholder="Enter phone number (e.g., +1234567890)" disabled>
-        </div>
-
-        <button id="callButton" class="call-button" disabled>
-            <svg class="call-icon" viewBox="0 0 24 24">
-                <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
-            </svg>
-            Start Call
-        </button>
-
-        <div class="quick-contacts">
-            <h3>Quick Contacts</h3>
-            <div class="contact-item" onclick="window.location.href = tel:+32497495562;">
-                <div class="contact-info">
-                    <div class="contact-avatar">JS</div>
-                    <div class="contact-details">
-                        <div class="contact-name">John Smith</div>
-                        <div class="contact-number">+1 (234) 567-890</div>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  </head>
+  <body>
+    <div class="py-4 px-4">
+        <ul role="list" class="divide-y divide-gray-100">
+            <li class="flex justify-between gap-x-6 py-5">
+                <div class="flex min-w-0 gap-x-4">
+                    <div class="min-w-0 flex-auto">
+                        <p class="text-sm/6 font-semibold text-gray-900">Evere - Atelier</p>
+                        <p class="mt-1 truncate text-xs/5 text-gray-500">939108</p>
                     </div>
                 </div>
-                <button class="call-contact-btn" onclick="event.stopPropagation(); callNumber('+1234567890')">Call</button>
-            </div>
-            
-            <div class="contact-item" onclick="callNumber('+0987654321')">
-                <div class="contact-info">
-                    <div class="contact-avatar">SJ</div>
-                    <div class="contact-details">
-                        <div class="contact-name">Sarah Johnson</div>
-                        <div class="contact-number">+0 (987) 654-321</div>
+                <div class="flex">
+                    <div>
+                        <span class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700">
+                            <a href="webextel://+123456789" class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700 hover:bg-teal-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                              </svg>
+                            </a>
+                          </span>
                     </div>
-                </div>
-                <button class="call-contact-btn" onclick="event.stopPropagation(); callNumber('+0987654321')">Call</button>
-            </div>
-            
-            <div class="contact-item" onclick="callNumber('+1122334455')">
-                <div class="contact-info">
-                    <div class="contact-avatar">MB</div>
-                    <div class="contact-details">
-                        <div class="contact-name">Mike Brown</div>
-                        <div class="contact-number">+1 (122) 334-455</div>
-                    </div>
-                </div>
-                <button class="call-contact-btn" onclick="event.stopPropagation(); callNumber('+1122334455')">Call</button>
-            </div>
-        </div>
 
-        <div id="errorMessage" class="error-message" style="display: none;"></div>
+                </div>
+            </li>
+            <li class="flex justify-between gap-x-6 py-5">
+                <div class="flex min-w-0 gap-x-4">
+                    <div class="min-w-0 flex-auto">
+                        <p class="text-sm/6 font-semibold text-gray-900">Evere - Doublon</p>
+                        <p class="mt-1 truncate text-xs/5 text-gray-500">939998</p>
+                    </div>
+                </div>
+                <div class="flex">
+                    <div>
+                        <span class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700">
+                            <a href="webextel://+3222061701" class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700 hover:bg-teal-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
+                              </svg>
+                            </a>
+                          </span>
+                    </div>
+                </div>
+            </li>
+        </ul>
     </div>
-
-    <!-- Webex SDK -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/webex/1.80.43/webex.min.js"></script>
-    
-    <script>
-        class WebexClickToCallApp {
-            constructor() {
-                this.webex = null;
-                this.isInitialized = false;
-                this.accessToken = null;
-                
-                this.statusEl = document.getElementById('status');
-                this.phoneInput = document.getElementById('phoneInput');
-                this.callButton = document.getElementById('callButton');
-                this.errorMessage = document.getElementById('errorMessage');
-                
-                this.init();
-            }
-            
-            async init() {
-                try {
-                    this.updateStatus('connecting', 'Connecting to Webex...');
-                    
-                    // For demo purposes, we'll simulate the initialization
-                    // In a real app, you would need to:
-                    // 1. Get an access token from your backend
-                    // 2. Initialize the Webex SDK with proper credentials
-                    
-                    // Simulate initialization delay
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Mock successful initialization
-                    this.mockInitialization();
-                    
-                } catch (error) {
-                    console.error('Failed to initialize Webex SDK:', error);
-                    this.updateStatus('disconnected', 'Failed to connect to Webex');
-                    this.showError('Unable to connect to Webex services. Please check your configuration.');
-                }
-            }
-            
-            mockInitialization() {
-                // This is a mock implementation for demonstration
-                // In production, you would use actual Webex SDK initialization
-                this.isInitialized = true;
-                this.updateStatus('connected', 'Connected to Webex');
-                this.enableControls();
-                
-                // Add event listeners
-                this.callButton.addEventListener('click', () => this.makeCall());
-                this.phoneInput.addEventListener('keypress', (e) => {
-                    if (e.key === 'Enter') {
-                        this.makeCall();
-                    }
-                });
-                
-                // Enable phone input formatting
-                this.phoneInput.addEventListener('input', this.formatPhoneNumber.bind(this));
-            }
-            
-            updateStatus(type, message) {
-                this.statusEl.className = `status ${type}`;
-                this.statusEl.textContent = message;
-            }
-            
-            enableControls() {
-                this.phoneInput.disabled = false;
-                this.callButton.disabled = false;
-                this.phoneInput.focus();
-            }
-            
-            formatPhoneNumber(event) {
-                let value = event.target.value.replace(/\D/g, '');
-                if (value.length >= 10) {
-                    value = value.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
-                    if (value.length > 14) {
-                        value = '+' + value.substring(0, value.length - 14) + ' ' + value.substring(value.length - 14);
-                    }
-                }
-                event.target.value = value;
-            }
-            
-            async makeCall() {
-                const phoneNumber = this.phoneInput.value.trim();
-                
-                if (!phoneNumber) {
-                    this.showError('Please enter a phone number');
-                    return;
-                }
-                
-                if (!this.isValidPhoneNumber(phoneNumber)) {
-                    this.showError('Please enter a valid phone number');
-                    return;
-                }
-                
-                await this.callNumber(phoneNumber);
-            }
-            
-            async callNumber(phoneNumber) {
-                try {
-                    this.hideError();
-                    this.callButton.disabled = true;
-                    this.callButton.innerHTML = '<div class="loading"></div> Calling...';
-                    
-                    // In a real implementation, this would use the Webex SDK:
-                    // const call = await this.webex.phone.dial(phoneNumber);
-                    
-                    // Mock call initiation
-                    console.log(`Initiating call to: ${phoneNumber}`);
-                    
-                    // Simulate call setup delay
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                    
-                    // Mock successful call initiation
-                    this.updateStatus('connected', `Calling ${phoneNumber}...`);
-                    
-                    // Simulate call duration
-                    setTimeout(() => {
-                        this.updateStatus('connected', 'Call connected successfully');
-                        this.resetCallButton();
-                    }, 3000);
-                    
-                } catch (error) {
-                    console.error('Call failed:', error);
-                    this.showError(`Failed to initiate call: ${error.message}`);
-                    this.resetCallButton();
-                }
-            }
-            
-            resetCallButton() {
-                this.callButton.disabled = false;
-                this.callButton.innerHTML = `
-                    <svg class="call-icon" viewBox="0 0 24 24">
-                        <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56-.35-.12-.74-.03-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
-                    </svg>
-                    Start Call
-                `;
-            }
-            
-            isValidPhoneNumber(phoneNumber) {
-                const cleanNumber = phoneNumber.replace(/\D/g, '');
-                return cleanNumber.length >= 10;
-            }
-            
-            showError(message) {
-                this.errorMessage.textContent = message;
-                this.errorMessage.style.display = 'block';
-            }
-            
-            hideError() {
-                this.errorMessage.style.display = 'none';
-            }
-        }
-        
-        // Global function for quick contact calls
-        function callNumber(phoneNumber) {
-            if (window.webexApp) {
-                window.webexApp.callNumber(phoneNumber);
-                document.getElementById('phoneInput').value = phoneNumber;
-            }
-        }
-        
-        // Initialize the app when DOM is loaded
-        document.addEventListener('DOMContentLoaded', () => {
-            window.webexApp = new WebexClickToCallApp();
-        });
-    </script>
 </body>
 </html>
