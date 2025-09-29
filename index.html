@@ -382,10 +382,10 @@
                 // This will trigger Webex's native calling interface
                 //await app.openUrl(`tel:${cleanNumber}`);
                 addLog(`[i] Trying to call ${cleanNumber}`, 'success');
-                await app.openUrlInSystemBrowser("https://github.io");       // or "."
-                // await app.openUrlInSystemBrowser('clicktocall:'+cleanNumber).catch((errorcode) => {
-                //   log("Error: ", window.webex.Application.ErrorCodes[errorcode]);
-                // });
+                //await app.openUrlInSystemBrowser("tel:+32497495562");       // or "."
+                 await app.openUrlInSystemBrowser('tel:+32497495562).catch((errorcode) => {
+                   log("Error: ", window.webex.Application.ErrorCodes[errorcode]);
+                 });
                 
                 addLog(`Call initiated to ${cleanNumber}`, 'success');
                 
