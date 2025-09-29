@@ -381,7 +381,7 @@
                 // Use the SDK to open the tel: URL
                 // This will trigger Webex's native calling interface
                 //await app.openUrl(`tel:${cleanNumber}`);
-                await  app.openUrlInSystemBrowser(`tel:${cleanNumber}`).catch((errorcode) => {
+                await  app.openUrlInSystemBrowser('webextel:'+cleanNumber).catch((errorcode) => {
                   log("Error: ", window.webex.Application.ErrorCodes[errorcode]);
                 });
                 
