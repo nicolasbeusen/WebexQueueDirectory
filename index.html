@@ -38,8 +38,32 @@
 
         .subtitle {
             color: #666;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 14px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-badge.connected {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-badge.connecting {
+            background: #fff3cd;
+            color: #856404;
         }
 
         .contact-card {
@@ -90,12 +114,17 @@
             transition: background 0.2s, transform 0.1s;
         }
 
-        .call-button:hover {
+        .call-button:hover:not(:disabled) {
             background: #008f26;
         }
 
-        .call-button:active {
+        .call-button:active:not(:disabled) {
             transform: scale(0.95);
+        }
+
+        .call-button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
         }
 
         .call-icon {
@@ -144,6 +173,36 @@
             margin-bottom: 5px;
         }
 
+        .log-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .log-title {
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .log-entry {
+            font-size: 12px;
+            font-family: 'Courier New', monospace;
+            padding: 4px 0;
+            color: #555;
+        }
+
+        .log-entry.error {
+            color: #d32f2f;
+        }
+
+        .log-entry.success {
+            color: #388e3c;
+        }
+
         @media (max-width: 480px) {
             .container {
                 padding: 20px;
@@ -169,7 +228,8 @@
 <body>
     <div class="container">
         <h1>📞 Webex Call Contacts</h1>
-        <p class="subtitle">Click any contact to initiate a call via Webex</p>
+        <p class="subtitle">Using Webex Embedded App SDK</p>
+        <div id="statusBadge" class="status-badge connecting">🔄 Connecting to SDK...</div>
 
         <!-- Predefined Contacts -->
         <div class="contact-card">
@@ -177,7 +237,7 @@
                 <div class="contact-name">John Doe</div>
                 <div class="contact-number">+1 (555) 123-4567</div>
             </div>
-            <button class="call-button" onclick="makeCall('+15551234567')">
+            <button class="call-button" onclick="makeCall('+15551234567', 'John Doe')" disabled id="btn1">
                 <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                 </svg>
@@ -190,7 +250,7 @@
                 <div class="contact-name">Jane Smith</div>
                 <div class="contact-number">+1 (555) 987-6543</div>
             </div>
-            <button class="call-button" onclick="makeCall('+15559876543')">
+            <button class="call-button" onclick="makeCall('+15559876543', 'Jane Smith')" disabled id="btn2">
                 <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                 </svg>
@@ -203,7 +263,7 @@
                 <div class="contact-name">Support Team</div>
                 <div class="contact-number">+1 (800) 555-0199</div>
             </div>
-            <button class="call-button" onclick="makeCall('+18005550199')">
+            <button class="call-button" onclick="makeCall('+18005550199', 'Support Team')" disabled id="btn3">
                 <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                 </svg>
@@ -220,8 +280,9 @@
                     id="customNumber" 
                     placeholder="Enter phone number (e.g., +15551234567)"
                     pattern="[\+]?[0-9]+"
+                    disabled
                 >
-                <button class="call-button" onclick="makeCustomCall()">
+                <button class="call-button" onclick="makeCustomCall()" disabled id="customBtn">
                     <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
                     </svg>
@@ -232,52 +293,150 @@
 
         <div class="info-box">
             <strong>ℹ️ How it works:</strong>
-            This page uses Webex deep links (webextel://) to initiate calls. When running inside a Webex embedded app on mobile, clicking a contact will trigger the native Webex calling interface.
+            This embedded app uses the Webex Embedded App Framework SDK to initiate calls. The app.openUrl() method with the tel: protocol triggers the native Webex calling interface.
+        </div>
+
+        <!-- Debug Log -->
+        <div class="log-section">
+            <div class="log-title">Activity Log:</div>
+            <div id="logContainer"></div>
         </div>
     </div>
 
+    <!-- Webex Embedded App Framework SDK -->
+    <script src="https://binaries.webex.com/static-content-pipeline/webex-embedded-app-sdk/v2/webex-embedded-app-sdk.js"></script>
+    
     <script>
-        function makeCall(phoneNumber) {
-            // Remove any formatting characters to ensure clean number
-            const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
-            
-            // Use Webex deep link protocol
-            const deepLink = `webextel:${cleanNumber}`;
-            
-            console.log('Initiating call to:', cleanNumber);
-            console.log('Deep link:', deepLink);
-            
-            // Attempt to open the deep link
-            window.location.href = deepLink;
-            
-            // Fallback for debugging
-            setTimeout(() => {
-                console.log('Call initiated. If nothing happened, the Webex app may not be available.');
-            }, 1000);
+        let app;
+        let isSDKReady = false;
+
+        // Initialize logs
+        function addLog(message, type = 'info') {
+            const logContainer = document.getElementById('logContainer');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            const timestamp = new Date().toLocaleTimeString();
+            entry.textContent = `[${timestamp}] ${message}`;
+            logContainer.appendChild(entry);
+            logContainer.scrollTop = logContainer.scrollHeight;
         }
 
+        // Update status badge
+        function updateStatus(status, message) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = `status-badge ${status}`;
+            const emoji = status === 'connected' ? '✅' : status === 'connecting' ? '🔄' : '❌';
+            badge.textContent = `${emoji} ${message}`;
+        }
+
+        // Enable/disable buttons
+        function setButtonsEnabled(enabled) {
+            const buttons = document.querySelectorAll('.call-button');
+            const input = document.getElementById('customNumber');
+            buttons.forEach(btn => btn.disabled = !enabled);
+            input.disabled = !enabled;
+        }
+
+        // Initialize Webex Embedded App SDK
+        async function initializeSDK() {
+            try {
+                addLog('Initializing Webex Embedded App SDK...');
+                updateStatus('connecting', 'Connecting to SDK...');
+
+                // Initialize the app
+                app = new window.Webex.Application();
+                
+                await app.onReady();
+                
+                addLog('SDK initialized successfully!', 'success');
+                updateStatus('connected', 'SDK Connected');
+                isSDKReady = true;
+                setButtonsEnabled(true);
+
+                // Get app context for debugging
+                const context = await app.context.getContext();
+                addLog(`App context: ${JSON.stringify(context)}`, 'info');
+
+            } catch (error) {
+                addLog(`SDK initialization failed: ${error.message}`, 'error');
+                updateStatus('disconnected', 'SDK Connection Failed');
+                console.error('SDK initialization error:', error);
+            }
+        }
+
+        // Make a call using the SDK
+        async function makeCall(phoneNumber, contactName) {
+            if (!isSDKReady) {
+                addLog('SDK not ready. Please wait...', 'error');
+                return;
+            }
+
+            try {
+                addLog(`Initiating call to ${contactName} (${phoneNumber})...`);
+                
+                // Clean the phone number
+                const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+                
+                // Use the SDK to open the tel: URL
+                // This will trigger Webex's native calling interface
+                await app.openUrl(`tel:${cleanNumber}`);
+                
+                addLog(`Call initiated to ${cleanNumber}`, 'success');
+                
+            } catch (error) {
+                addLog(`Call failed: ${error.message}`, 'error');
+                console.error('Call error:', error);
+                
+                // Show user-friendly error message
+                alert(`Unable to initiate call: ${error.message}`);
+            }
+        }
+
+        // Make a custom call
         function makeCustomCall() {
             const input = document.getElementById('customNumber');
             const phoneNumber = input.value.trim();
             
             if (!phoneNumber) {
+                addLog('Please enter a phone number', 'error');
                 alert('Please enter a phone number');
                 return;
             }
             
             // Basic validation
             if (!/^[\+]?[0-9]+$/.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
+                addLog('Invalid phone number format', 'error');
                 alert('Please enter a valid phone number (digits only, optionally starting with +)');
                 return;
             }
             
-            makeCall(phoneNumber);
+            makeCall(phoneNumber, 'Custom Contact');
         }
 
         // Allow Enter key to trigger call
         document.getElementById('customNumber').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 makeCustomCall();
+            }
+        });
+
+        // Initialize SDK when page loads
+        window.addEventListener('DOMContentLoaded', () => {
+            addLog('Page loaded, waiting for SDK...');
+            
+            // Check if SDK is available
+            if (typeof window.Webex !== 'undefined' && window.Webex.Application) {
+                initializeSDK();
+            } else {
+                // Retry after a short delay
+                setTimeout(() => {
+                    if (typeof window.Webex !== 'undefined' && window.Webex.Application) {
+                        initializeSDK();
+                    } else {
+                        addLog('Webex SDK not found. Make sure this runs in a Webex embedded app.', 'error');
+                        updateStatus('disconnected', 'SDK Not Available');
+                    }
+                }, 1000);
             }
         });
     </script>
