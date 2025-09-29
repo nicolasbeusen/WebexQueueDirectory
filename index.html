@@ -1,53 +1,285 @@
-<!doctype html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  </head>
-  <body>
-    <div class="py-4 px-4">
-        <ul role="list" class="divide-y divide-gray-100">
-            <li class="flex justify-between gap-x-6 py-5">
-                <div class="flex min-w-0 gap-x-4">
-                    <div class="min-w-0 flex-auto">
-                        <p class="text-sm/6 font-semibold text-gray-900">Evere - Atelier</p>
-                        <p class="mt-1 truncate text-xs/5 text-gray-500">939108</p>
-                    </div>
-                </div>
-                <div class="flex">
-                    <div>
-                        <span class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700">
-                            <a href="clicktocall://+123456789" class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700 hover:bg-teal-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                              </svg>
-                            </a>
-                          </span>
-                    </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Webex Call Contacts</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-                </div>
-            </li>
-            <li class="flex justify-between gap-x-6 py-5">
-                <div class="flex min-w-0 gap-x-4">
-                    <div class="min-w-0 flex-auto">
-                        <p class="text-sm/6 font-semibold text-gray-900">Evere - Doublon</p>
-                        <p class="mt-1 truncate text-xs/5 text-gray-500">939998</p>
-                    </div>
-                </div>
-                <div class="flex">
-                    <div>
-                        <span class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700">
-                            <a href="sip://+3222061701" class="inline-flex rounded-lg bg-teal-50 p-3 text-teal-700 hover:bg-teal-100">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 0 0 2.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 0 1-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 0 0-1.091-.852H4.5A2.25 2.25 0 0 0 2.25 4.5v2.25Z" />
-                              </svg>
-                            </a>
-                          </span>
-                    </div>
-                </div>
-            </li>
-        </ul>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .contact-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .contact-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .contact-info {
+            flex: 1;
+        }
+
+        .contact-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .contact-number {
+            font-size: 14px;
+            color: #666;
+            font-family: 'Courier New', monospace;
+        }
+
+        .call-button {
+            background: #00a82d;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .call-button:hover {
+            background: #008f26;
+        }
+
+        .call-button:active {
+            transform: scale(0.95);
+        }
+
+        .call-icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        .custom-input-section {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        input[type="tel"] {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="tel"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #1565c0;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .contact-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .call-button {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📞 Webex Call Contacts</h1>
+        <p class="subtitle">Click any contact to initiate a call via Webex</p>
+
+        <!-- Predefined Contacts -->
+        <div class="contact-card">
+            <div class="contact-info">
+                <div class="contact-name">John Doe</div>
+                <div class="contact-number">+1 (555) 123-4567</div>
+            </div>
+            <button class="call-button" onclick="makeCall('+15551234567')">
+                <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Call
+            </button>
+        </div>
+
+        <div class="contact-card">
+            <div class="contact-info">
+                <div class="contact-name">Jane Smith</div>
+                <div class="contact-number">+1 (555) 987-6543</div>
+            </div>
+            <button class="call-button" onclick="makeCall('+15559876543')">
+                <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Call
+            </button>
+        </div>
+
+        <div class="contact-card">
+            <div class="contact-info">
+                <div class="contact-name">Support Team</div>
+                <div class="contact-number">+1 (800) 555-0199</div>
+            </div>
+            <button class="call-button" onclick="makeCall('+18005550199')">
+                <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                </svg>
+                Call
+            </button>
+        </div>
+
+        <!-- Custom Number Input -->
+        <div class="custom-input-section">
+            <h2 style="margin-bottom: 15px; color: #333; font-size: 20px;">Call Custom Number</h2>
+            <div class="input-group">
+                <input 
+                    type="tel" 
+                    id="customNumber" 
+                    placeholder="Enter phone number (e.g., +15551234567)"
+                    pattern="[\+]?[0-9]+"
+                >
+                <button class="call-button" onclick="makeCustomCall()">
+                    <svg class="call-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                    </svg>
+                    Call
+                </button>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>ℹ️ How it works:</strong>
+            This page uses Webex deep links (webextel://) to initiate calls. When running inside a Webex embedded app on mobile, clicking a contact will trigger the native Webex calling interface.
+        </div>
     </div>
+
+    <script>
+        function makeCall(phoneNumber) {
+            // Remove any formatting characters to ensure clean number
+            const cleanNumber = phoneNumber.replace(/[\s\-\(\)]/g, '');
+            
+            // Use Webex deep link protocol
+            const deepLink = `webextel:${cleanNumber}`;
+            
+            console.log('Initiating call to:', cleanNumber);
+            console.log('Deep link:', deepLink);
+            
+            // Attempt to open the deep link
+            window.location.href = deepLink;
+            
+            // Fallback for debugging
+            setTimeout(() => {
+                console.log('Call initiated. If nothing happened, the Webex app may not be available.');
+            }, 1000);
+        }
+
+        function makeCustomCall() {
+            const input = document.getElementById('customNumber');
+            const phoneNumber = input.value.trim();
+            
+            if (!phoneNumber) {
+                alert('Please enter a phone number');
+                return;
+            }
+            
+            // Basic validation
+            if (!/^[\+]?[0-9]+$/.test(phoneNumber.replace(/[\s\-\(\)]/g, ''))) {
+                alert('Please enter a valid phone number (digits only, optionally starting with +)');
+                return;
+            }
+            
+            makeCall(phoneNumber);
+        }
+
+        // Allow Enter key to trigger call
+        document.getElementById('customNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                makeCustomCall();
+            }
+        });
+    </script>
 </body>
 </html>
