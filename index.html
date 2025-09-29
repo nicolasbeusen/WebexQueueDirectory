@@ -430,7 +430,7 @@
             } else {
                 // Retry after a short delay
                 setTimeout(() => {
-                    if (typeof window.Webex !== 'undefined' && window.Webex.Application) {
+                    if (typeof window.webex !== 'undefined' && window.webex.Application) {
                         initializeSDK();
                     } else {
                         addLog('Webex SDK not found. Make sure this runs in a Webex embedded app.', 'error');
