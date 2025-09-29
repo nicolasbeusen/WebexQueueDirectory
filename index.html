@@ -431,7 +431,7 @@
             addLog('Page loaded, waiting for SDK...');
             
             // Check if SDK is available
-            if (typeof window.Webex !== 'undefined' && window.Webex.Application) {
+            if (typeof window.webex !== 'undefined' && window.webex.Application) {
                 initializeSDK();
             } else {
                 // Retry after a short delay
