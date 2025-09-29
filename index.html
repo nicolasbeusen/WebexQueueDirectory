@@ -383,7 +383,7 @@
                 //await app.openUrl(`tel:${cleanNumber}`);
                 addLog(`[i] Trying to call ${cleanNumber}`, 'success');
                 //await app.openUrlInSystemBrowser("tel:+32497495562");       // or "."
-                 await app.openUrlInSystemBrowser('tel:+32497495562).catch((errorcode) => {
+                 await app.openUrlInSystemBrowser('tel:+32497495562').catch((errorcode) => {
                    log("Error: ", window.webex.Application.ErrorCodes[errorcode]);
                  });
                 
