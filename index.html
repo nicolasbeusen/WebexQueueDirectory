@@ -310,6 +310,7 @@
         let app;
         let isSDKReady = false;
 
+        
         // Initialize logs
         function addLog(message, type = 'info') {
             const logContainer = document.getElementById('logContainer');
@@ -379,7 +380,10 @@
                 
                 // Use the SDK to open the tel: URL
                 // This will trigger Webex's native calling interface
-                await app.openUrl(`tel:${cleanNumber}`);
+                //await app.openUrl(`tel:${cleanNumber}`);
+                await  app.openUrlInSystemBrowser(`tel:${cleanNumber}`).catch((errorcode) => {
+                  log("Error: ", window.webex.Application.ErrorCodes[errorcode]);
+                });
                 
                 addLog(`Call initiated to ${cleanNumber}`, 'success');
                 
