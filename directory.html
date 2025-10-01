@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Webex Click-to-Call (Frontend-only, PAT for testing)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 24px; }
+    fieldset { border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    label { display:block; margin: 8px 0 4px; font-weight: 600; }
+    input[type="text"], textarea, select { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; }
+    button { padding: 10px 14px; border: 0; border-radius: 8px; cursor: pointer; }
+    button.primary { background: #0564d2; color: #fff; }
+    button.ghost { background: transparent; border:1px solid #ccc; }
+    .row { display: grid; gap: 12px; grid-template-columns: 1fr 1fr; }
+    .row-3 { display: grid; gap: 12px; grid-template-columns: 1fr 1fr 1fr; }
+    .muted { color:#666; font-size: 0.9rem; }
+    .list { border:1px solid #eee; border-radius:8px; padding:8px; }
+    .item { display:flex; align-items:center; justify-content: space-between; padding:6px 8px; border-bottom:1px dashed #eee; }
+    .item:last-child { border-bottom:0; }
+    .log { white-space: pre-wrap; background:#0b1020; color:#d1d5db; padding:12px; border-radius:8px; max-height:280px; overflow:auto; font-size:12px; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:999px; background:#eef2ff; color:#3730a3; font-size:12px; margin-left:6px;}
+  </style>
+</head>
+<body>
+
+  <h1>Webex Click-to-Call (using Personal Access Token)</h1>
+  <p class="muted">For development only. Paste your <em>Personal Access Token</em> (12-hour lifetime) and try click-to-call with your Webex Calling endpoints.</p>
+
+  <fieldset>
+    <legend>1) Token & API base</legend>
+    <label>Personal Access Token (Bearer)</label>
+    <input id="token" type="text" placeholder="e.g. MmYx... (paste full token here)" />
+
+    <div class="row">
+      <div>
+        <label>API Base URL</label>
+        <input id="apiBase" type="text" value="https://webexapis.com" />
+        <div class="muted">Default: <code>https://webexapis.com</code>. (Gov tenants: <code>https://api-usgov.webex.com</code>)</div>
+      </div>
+      <div style="display:flex; align-items:flex-end; gap:8px; margin-top: 6px;">
+        <button class="primary" id="btnLoadEndpoints">Load my Preferred Answer Endpoints</button>
+        <button class="ghost" id="btnClear">Clear token</button>
+      </div>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend>2) Choose Endpoint (optional)</legend>
+    <label>Endpoint to use for the call</label>
+    <select id="endpointSelect">
+      <option value="">(No specific endpoint — let Webex choose primary)</option>
+    </select>
+    <div id="endpointMeta" class="muted"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>3) Call List</legend>
+    <div class="row">
+      <div>
+        <label>Add a number (E.164, extension, or SIP URI)</label>
+        <input id="newNumber" type="text" placeholder="+3225551234 or 1234 or sip:user@domain.tld" />
+      </div>
+      <div style="display:flex; align-items:flex-end;">
+        <button class="primary" id="btnAdd">Add to list</button>
+      </div>
+    </div>
+
+    <div class="list" id="callList"></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>Log</legend>
+    <div class="log" id="log"></div>
+  </fieldset>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const log = (m, o) => {
+    const el = $("log");
+    const ts = new Date().toISOString();
+    el.textContent += `[${ts}] ${m}` + (o ? " " + JSON.stringify(o, null, 2) : "") + "\n";
+    el.scrollTop = el.scrollHeight;
+  };
+
+  const state = {
+    token: "",
+    apiBase: "https://webexapis.com",
+    endpoints: [],
+    numbers: ["+3225550100", "+32470123456", "1234"], // demo seeds
+  };
+
+  function renderNumbers(){
+    const cont = $("callList");
+    cont.innerHTML = "";
+    if(state.numbers.length === 0){
+      cont.innerHTML = `<div class="muted">No numbers yet. Add one above.</div>`;
+      return;
+    }
+    state.numbers.forEach((n, idx) => {
+      const row = document.createElement("div");
+      row.className = "item";
+      row.innerHTML = `
+        <div><strong>${escapeHtml(n)}</strong></div>
+        <div style="display:flex; gap:8px;">
+          <button class="primary" data-action="dial" data-index="${idx}">Dial</button>
+          <button class="ghost" data-action="remove" data-index="${idx}">Remove</button>
+        </div>
+      `;
+      cont.appendChild(row);
+    });
+    cont.querySelectorAll("button").forEach(btn => btn.addEventListener("click", onRowBtn));
+  }
+
+  function onRowBtn(e){
+    const idx = parseInt(e.currentTarget.dataset.index, 10);
+    const action = e.currentTarget.dataset.action;
+    if(action === "remove"){
+      state.numbers.splice(idx,1);
+      renderNumbers();
+    } else if (action === "dial"){
+      const number = state.numbers[idx];
+      dial(number).catch(err => log("Dial failed", { error: String(err) }));
+    }
+  }
+
+  function getHeaders(){
+    if(!state.token) throw new Error("Missing token.");
+    return {
+      "Authorization": `Bearer ${state.token}`,
+      "Content-Type": "application/json"
+    };
+  }
+
+  async function fetchJson(path, options = {}, retry429 = true){
+    const url = path.startsWith("http") ? path : `${state.apiBase}${path}`;
+    const res = await fetch(url, { ...options, headers: { ...(options.headers || {}), ...getHeaders() }});
+    if(res.status === 429 && retry429){
+      const wait = parseInt(res.headers.get("Retry-After") || "1", 10) * 1000;
+      log(`Rate limited (429). Retrying after ${wait/1000}s…`);
+      await new Promise(r => setTimeout(r, wait));
+      return fetchJson(path, options, false);
+    }
+    if(!res.ok){
+      const text = await res.text().catch(()=> "");
+      throw new Error(`HTTP ${res.status} ${res.statusText}: ${text}`);
+    }
+    // Some endpoints return 204
+    const ct = res.headers.get("content-type") || "";
+    if(!ct.includes("application/json")) return {};
+    return res.json();
+  }
+
+  // Preferred Answer Endpoints (two strategies: "for-me" first, then fallback via /people/me)
+  async function loadPreferredAnswerEndpoints(){
+    // Try “for me”: /v1/telephony/config/me/preferredAnswerEndpoint
+    // If not available in your tenant, fallback to /people/me then /telephony/config/people/{id}/preferredAnswerEndpoint
+    let data = null;
+    try {
+      data = await fetchJson("/v1/telephony/config/me/preferredAnswerEndpoint", { method: "GET" });
+      log("Loaded endpoints via /me route");
+    } catch(e){
+      log("'/me' route not available, falling back via /people/me…");
+      const me = await fetchJson("/v1/people/me", { method: "GET" });
+      const personId = me && me.id;
+      if(!personId) throw new Error("Could not resolve personId from /people/me.");
+      data = await fetchJson(`/v1/telephony/config/people/${encodeURIComponent(personId)}/preferredAnswerEndpoint`, { method: "GET" });
+      log("Loaded endpoints via /people/{id} route");
+    }
+
+    // shape: { preferredAnswerEndpointId, endpoints: [{ id, type, name, ... }] }
+    state.endpoints = (data.endpoints || []);
+    const sel = $("endpointSelect");
+    sel.innerHTML = `<option value="">(No specific endpoint — let Webex choose primary)</option>`;
+    state.endpoints.forEach(ep => {
+      const opt = document.createElement("option");
+      opt.value = ep.id;
+      opt.textContent = `${ep.name || ep.id} ${ep.type ? `(${ep.type})` : ""}`;
+      sel.appendChild(opt);
+    });
+    const preferred = data.preferredAnswerEndpointId || "";
+    if(preferred && state.endpoints.some(e => e.id === preferred)){
+      sel.value = preferred;
+    }
+    $("endpointMeta").innerHTML = `
+      ${preferred ? `Preferred: <code>${escapeHtml(preferred)}</code>` : `No preferred endpoint set`}
+      <span class="badge">${state.endpoints.length} endpoint(s)</span>
+    `;
+  }
+
+  async function dial(destination){
+    if(!destination) throw new Error("Missing destination.");
+    const endpointId = $("endpointSelect").value || undefined;
+
+    const payload = { destination };
+    if(endpointId) payload.endpointId = endpointId;
+
+    log("Dial request", payload);
+    const res = await fetchJson("/v1/telephony/calls/dial", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+    // Response includes callId + callSessionId
+    log("Dial success", res);
+    alert(`Dial initiated to ${destination}.\ncallId: ${res.callId}\ncallSessionId: ${res.callSessionId}`);
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, m => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#039;" }[m]));
+  }
+
+  // Wire up UI
+  $("btnLoadEndpoints").addEventListener("click", async () => {
+    state.token = $("token").value.trim();
+    state.apiBase = $("apiBase").value.trim().replace(/\/+$/, "");
+    if(!state.token){ alert("Paste your Personal Access Token first."); return; }
+    try{
+      await loadPreferredAnswerEndpoints();
+    } catch(e){
+      log("Failed loading endpoints", { error: String(e) });
+      alert("Could not load endpoints. Check token, scopes, and API base (Gov vs Commercial). See log.");
+    }
+  });
+
+  $("btnAdd").addEventListener("click", () => {
+    const v = $("newNumber").value.trim();
+    if(!v) return;
+    state.numbers.push(v);
+    $("newNumber").value = "";
+    renderNumbers();
+  });
+
+  $("btnClear").addEventListener("click", () => {
+    $("token").value = "";
+    state.token = "";
+    log("Cleared token.");
+  });
+
+  renderNumbers();
+})();
+</script>
+</body>
+</html>
